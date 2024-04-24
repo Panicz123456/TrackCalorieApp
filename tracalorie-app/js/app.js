@@ -138,7 +138,11 @@ class App {
 
     document
       .getElementById("meal-form")
-      .addEventListener("submit", this._newMeal.bind(this));
+      .addEventListener("submit", this._newItem.bind(this, 'meal'));
+
+    document
+      .getElementById("workout-form")
+      .addEventListener("submit", this._newItem.bind(this, 'workout'));
   }
 
   _newMeal(e) {
@@ -166,6 +170,38 @@ class App {
     });
   }
 }
+
+_newItem(type, e) {
+  e.preventDefault();
+
+  const name = document.getElementById(`${type}-name`);
+  const calories = document.getElementById(`${type}-calories`);
+
+  // Validate inputs
+  if (name.value === "" || calories.value === "") {
+    alert("Please fill in all fiels");
+    return;
+  }
+
+  if (type === 'meal') { 
+    const meal = new Meal(name.value, +calories.value);
+    this._tracker.addMeal(meal);
+  } else { 
+    const workout = new Workout(name.value, +calories.value);
+    this._tracker.addWorkout(workout);
+  }
+
+
+
+  name.value = "";
+  calories.value = "";
+
+  const collapseMeal = document.getElementById(`collapse-${type}`);
+  const bsCollapse = new bootstrap.Collapse(collapseItem, { 
+    toggle: true
+  });
+}
+
 
 _newWorkout(e) {
   e.preventDefault();

@@ -27,18 +27,40 @@ class CalorieTracker {
     this._render();
   }
 
+  removeMeal(id) {
+    const index = this._meals.findIndex(() => meal.id === id);
+
+    if (index !== -1) {
+      const meal = this._meals[index];
+      this._totalCalories -= meal.calories;
+      this._meals.splice(index, 1);
+      this._render();
+    }
+  }
+
+  removeWorkout(id) {
+    const index = this._workouts.findIndex(() => workout.id === id);
+
+    if (index !== -1) {
+      const workout = this._workouts[index];
+      this._totalCalories += workout.calories;
+      this._workouts.splice(index, 1);
+      this._render();
+    }
+  }
+
   _displayCaloriesTotal() {
-    const totalCaloriesEl = document.getElementById('calories-total');
+    const totalCaloriesEl = document.getElementById("calories-total");
     totalCaloriesEl.innerHTML = this._totalCalories;
   }
 
   _displayCaloriesLimit() {
-    const calorieLimitEl = document.getElementById('calories-limit');
+    const calorieLimitEl = document.getElementById("calories-limit");
     calorieLimitEl.innerHTML = this._calorieLimit;
   }
 
   _displayCaloriesConsumed() {
-    const caloriesConsumedEl = document.getElementById('calories-consumed');
+    const caloriesConsumedEl = document.getElementById("calories-consumed");
 
     const consumed = this._meals.reduce(
       (total, meal) => total + meal.calories,
@@ -49,7 +71,7 @@ class CalorieTracker {
   }
 
   _displayCaloriesBurned() {
-    const caloriesBurnedEl = document.getElementById('calories-burned');
+    const caloriesBurnedEl = document.getElementById("calories-burned");
 
     const burned = this._workouts.reduce(
       (total, workout) => total + workout.calories,
@@ -60,35 +82,35 @@ class CalorieTracker {
   }
 
   _displayCaloriesRemaining() {
-    const caloriesRemainingEl = document.getElementById('calories-remaining');
-    const progressEl = document.getElementById('calorie-progress');
+    const caloriesRemainingEl = document.getElementById("calories-remaining");
+    const progressEl = document.getElementById("calorie-progress");
     const remaining = this._calorieLimit - this._totalCalories;
     caloriesRemainingEl.innerHTML = remaining;
     if (remaining <= 0) {
-      caloriesRemainingEl.parentElement.classList.remove('bg-light');
-      caloriesRemainingEl.parentElement.classList.add('bg-danger');
-      progressEl.classList.add('bg-danger');
-      progressEl.classList.remove('bg-success');
+      caloriesRemainingEl.parentElement.classList.remove("bg-light");
+      caloriesRemainingEl.parentElement.classList.add("bg-danger");
+      progressEl.classList.add("bg-danger");
+      progressEl.classList.remove("bg-success");
     } else {
-      caloriesRemainingEl.parentElement.classList.remove('bg-danger');
-      caloriesRemainingEl.parentElement.classList.add('bg-light');
-      progressEl.classList.remove('bg-danger');
-      progressEl.classList.add('bg-success');
+      caloriesRemainingEl.parentElement.classList.remove("bg-danger");
+      caloriesRemainingEl.parentElement.classList.add("bg-light");
+      progressEl.classList.remove("bg-danger");
+      progressEl.classList.add("bg-success");
     }
   }
 
   _displayCaloriesProgress() {
-    const progressEl = document.getElementById('calorie-progress');
+    const progressEl = document.getElementById("calorie-progress");
     const percentage = (this._totalCalories / this._calorieLimit) * 100;
     const width = Math.min(percentage, 100);
     progressEl.style.width = `${width}%`;
   }
 
   _displayNewMeal(meal) {
-    const mealsEl = document.getElementById('meal-items');
-    const mealEl = document.createElement('div');
-    mealEl.classList.add('card', 'my-2');
-    mealEl.setAttribute('data-id', meal.id);
+    const mealsEl = document.getElementById("meal-items");
+    const mealEl = document.createElement("div");
+    mealEl.classList.add("card", "my-2");
+    mealEl.setAttribute("data-id", meal.id);
     mealEl.innerHTML = `
     <div class="card-body">
       <div class="d-flex align-items-center justify-content-between">
@@ -106,10 +128,10 @@ class CalorieTracker {
   }
 
   _displayNewWorkout(workout) {
-    const workoutsEl = document.getElementById('workout-items');
-    const workoutEl = document.createElement('div');
-    workoutEl.classList.add('card', 'my-2');
-    workoutEl.setAttribute('data-id', workout.id);
+    const workoutsEl = document.getElementById("workout-items");
+    const workoutEl = document.createElement("div");
+    workoutEl.classList.add("card", "my-2");
+    workoutEl.setAttribute("data-id", workout.id);
     workoutEl.innerHTML = `
     <div class="card-body">
       <div class="d-flex align-items-center justify-content-between">
@@ -156,12 +178,20 @@ class App {
     this._tracker = new CalorieTracker();
 
     document
-      .getElementById('meal-form')
-      .addEventListener('submit', this._newItem.bind(this, 'meal'));
+      .getElementById("meal-form")
+      .addEventListener("submit", this._newItem.bind(this, "meal"));
 
     document
-      .getElementById('workout-form')
-      .addEventListener('submit', this._newItem.bind(this, 'workout'));
+      .getElementById("workout-form")
+      .addEventListener("submit", this._newItem.bind(this, "workout"));
+
+    document
+      .getElementById("meal-items")
+      .addEventListener("click", _removeItems.bind(this, "meal"));
+
+      document
+      .getElementById("workout-items")
+      .addEventListener("click", _removeItems.bind(this, "workout"));
   }
 
   _newItem(type, e) {
@@ -169,27 +199,44 @@ class App {
     const name = document.getElementById(`${type}-name`);
     const calories = document.getElementById(`${type}-calories`);
 
-    if (name.value === '' || calories.value === '') {
-      alert('Please fill in all fields');
+    if (name.value === "" || calories.value === "") {
+      alert("Please fill in all fields");
       return;
     }
 
-    if (type === 'meal') {
+    if (type === "meal") {
       const meal = new Meal(name.value, +calories.value);
       this._tracker.addMeal(meal);
     }
-    if (type === 'workout') {
+    if (type === "workout") {
       const workout = new Workout(name.value, +calories.value);
       this._tracker.addWorkout(workout);
     }
 
-    name.value = '';
-    calories.value = '';
+    name.value = "";
+    calories.value = "";
 
     const collapseItem = document.getElementById(`collapse-${type}`);
     const bsCollapse = new bootstrap.Collapse(collapseItem, {
       toggle: true,
     });
+  }
+
+  _removeItems(type, e) {
+    if (
+      e.target.classList.contains("delete") ||
+      e.target.classList.contains("fa-xmark")
+    ) {
+      if (confirm("Are you sure?")) {
+        const id = e.target.closest(".card").getAttribute("data-id");
+
+        type === "meal"
+          ? this._tracker.removeMeal(id)
+          : this._tracker.removeWorkout(id);
+
+        e.target.closest(".card").remove();
+      }
+    }
   }
 }
 
